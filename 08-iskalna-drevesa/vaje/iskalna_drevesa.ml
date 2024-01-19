@@ -221,6 +221,7 @@ let rec delete x = function
  vrednosti, ga parametriziramo kot [('key, 'value) dict].
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
+type ('key, 'value) dict = ('key * 'value) tree
 
 (*----------------------------------------------------------------------------*]
  Napišite testni primer [test_dict]:
@@ -230,7 +231,7 @@ let rec delete x = function
          /
      "c":-2
 [*----------------------------------------------------------------------------*)
-
+let test_dict = Node(leaf ("a", 0), ("b", 1), Node(leaf ("c", -2), ("d", 2), Empty)) 
 
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_get key dict] v slovarju poišče vrednost z ključem [key]. Ker
@@ -241,8 +242,14 @@ let rec delete x = function
  # dict_get "c" test_dict;;
  - : int option = Some (-2)
 [*----------------------------------------------------------------------------*)
+let rec dict_get key = function
+			| Empty -> None
+			| Node(l, (k, v), d) -> 
+				if key = k then 
+					Some v
+				else if key < k then dict_get key l
+				else dict_get key d
 
-      
 (*----------------------------------------------------------------------------*]
  Funkcija [print_dict] sprejme slovar s ključi tipa [string] in vrednostmi tipa
  [int] in v pravilnem vrstnem redu izpiše vrstice "ključ : vrednost" za vsa
@@ -258,7 +265,14 @@ let rec delete x = function
  d : 2
  - : unit = ()
 [*----------------------------------------------------------------------------*)
+let rec print_dict = function
+ | Empty -> ()
+ | Node (d_l, (k, v), d_r) -> (
+    print_dict d_l;
+    print_string (k ^ " : "); print_int v; print_newline ();
+    print_dict d_r)
 
+(*za printanje več vrstic hkrati uporabimo ; *)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_insert key value dict] v slovar [dict] pod ključ [key] vstavi
@@ -279,3 +293,8 @@ let rec delete x = function
  - : unit = ()
 [*----------------------------------------------------------------------------*)
 
+let rec dict_insert key v = function
+  | Empty -> leaf (key, v)
+  | Node (l, (k, _), r) when key = k -> Node (l, (key, v), r)
+  | Node (l, (k, v'), r) when key < k -> Node (dict_insert key v l, (k, v'), r)
+  | Node (l, (k, v'), r) (* when key > k' *) -> Node (l, (k, v'), dict_insert key v r)

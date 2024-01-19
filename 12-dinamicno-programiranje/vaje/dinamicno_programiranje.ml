@@ -21,6 +21,19 @@ let test_matrix =
      [| 2 ; 4 ; 5 |];
      [| 7 ; 0 ; 1 |] |]
 
+let max_cheese cheese_matrix =
+   let dim_n = Array.length cheese_matrix in
+   let dim_m = Array.length cheese_matrix.(0) in 
+   let rec optimalna_pot x y = 
+      let trenutno = cheese_matrix.(y).(x) in 
+      let navzdol = if y + 1 = dim_n then 0 
+                     else optimalna_pot x (y + 1) in 
+      let desno = if x + 1 = dim_m then 0 
+                     else optimalna_pot (x + 1) y in
+      trenutno + max navzdol desno
+   in
+   optimalna_pot 0 0
+
 (*----------------------------------------------------------------------------*]
  Poleg količine sira, ki jo miška lahko poje, jo zanima tudi točna pot, ki naj
  jo ubere, da bo prišla do ustrezne pojedine.
@@ -37,7 +50,44 @@ let test_matrix =
 [*----------------------------------------------------------------------------*)
 
 type mouse_direction = Down | Right
+(*let optimal_path cheese_matrix =
+   let dim_n = Array.length cheese_matrix in 
+   let dim_m = Array.length cheese_matrix.(0) in 
+   let rec opt_pot x y = 
+      let trenutno = cheese_matrix.(y).(x) in 
+      let (navzdol, pot_navzdol) = if y + 1 = dim_n then (0, []) 
+                     else opt_pot x (y + 1)  in 
+      let (desno, pot_desno) = if x + 1 = dim_m then (0, [])
+                     else opt_pot (x + 1) y in
+      
+      
+      
+   opt_pot 0 0*)
 
+let optimal_path matrix =
+   let n = Array.length matrix in
+   let m = Array.length matrix.(0) in 
+   let rec aux i j = 
+      if i = n - 1 && j = m - 1 then 
+         (matrix.(i).(j), [])
+      else if i = n - 1 then
+         let naprej, smeri = aux i (j + 1) in 
+         (matrix.(i).(j) + naprej, Right :: smeri)
+      else if j = m - 1 then
+         let naprej, smeri = aux (i + 1) j in 
+         (matrix.(i).(j) + naprej, Down :: smeri)
+      else (
+         let n_desno, s_desno = aux i (j + 1) in 
+         let n_dol, s_dol = aux (i + 1) j in
+
+         if n_desno > n_dol then
+            (n_desno + matrix.(i).(j), Right :: s_desno)
+         else
+            (n_dol + matrix.(i).(j), Down :: s_dol)
+      )
+      in 
+      let _, smeri = aux 0 0 in 
+      smeri
 
 (*----------------------------------------------------------------------------*]
  Rešujemo problem sestavljanja alternirajoče obarvanih stolpov. Imamo štiri
